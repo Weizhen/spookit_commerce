@@ -1,4 +1,4 @@
-import { createMcpHandler } from "@vercel/mcp-adapter";
+import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 
 import { desc } from "drizzle-orm";
@@ -389,7 +389,7 @@ const handler = createMcpHandler(
     );
   },
   {},
-  { basePath: "/api/mcp", maxDuration: 60 },
+  { basePath: "/api", maxDuration: 60 },
 );
 
 export { handler as GET, handler as POST, handler as DELETE };
