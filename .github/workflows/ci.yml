@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # Build does not require a live DB; pages catch connection errors at
+          # request time. A dummy URL keeps drizzle config happy if referenced.
+          DATABASE_URL: "postgresql://user:pass@localhost:5432/db"
+          NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
+# NOTE (per plan §12): on PR, also spin a Neon branch and run migrations/tests,
+# then a Vercel preview deploy; on merge to main, migrate the main Neon branch
+# and trigger a Vercel production deploy. Those steps require NEON_API_KEY +
+# VERCEL_TOKEN secrets and are added once the repo is linked.
