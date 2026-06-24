@@ -112,6 +112,64 @@ For the MVP, sign as `sig::<did>`. Example flow:
 4. `add_to_cart` → `checkout` → `confirm_purchase`.
 5. `request_refund` for a paid order.
 
+## Buyer agent skill (Hermes)
+
+The [`Skill/`](Skill) folder is a portable **Agent Skill** that teaches a buyer
+agent (e.g. Hermes) how to transact against the live gateway. It contains the
+instructions (`SKILL.md`) and a runnable end-to-end buyer (`scripts/buy.mjs`).
+
+```
+Skill/
+├── SKILL.md            # connection, identity, procurement workflow, tool catalog
+└── scripts/
+    └── buy.mjs         # autonomous buyer: search → cart → checkout → confirm
+```
+
+### Install
+
+1. Copy the `Skill/` folder into your agent's skills directory:
+   - Cursor / Claude: `~/.cursor/skills/spookit-commerce-buyer/` (personal) or
+     `<repo>/.cursor/skills/spookit-commerce-buyer/` (project).
+   - Other agents: drop `SKILL.md` wherever your runtime loads skills.
+2. Install the one runtime dependency the script needs:
+
+```bash
+npm install @modelcontextprotocol/sdk
+```
+
+### Use
+
+Run the bundled buyer end-to-end (defaults to the live endpoint and the Hermes
+identity):
+
+```bash
+node Skill/scripts/buy.mjs --category compute --qty 1 --confirm
+```
+
+Flags: `--category <name>`, `--query <text>`, `--max-price <usd>`, `--qty <n>`,
+`--customer <ref>`, `--confirm` (finalize payment), `--endpoint <url>`,
+`--did <did>`. Identity can also be set via `SPOOKIT_MCP_URL`, `SPOOKIT_DID`,
+and `SPOOKIT_SIGNATURE` env vars.
+
+Connection details (also in `SKILL.md`):
+
+| | |
+|---|---|
+| Endpoint | `https://commerce.spookit.com/api/mcp` |
+| Identity (DID) | `did:web:hermes.bot` |
+| Signature (MVP) | `sig::did:web:hermes.bot` (mock-verified) |
+
+To wire the skill into a stdio-only MCP host instead of running the script,
+bridge with `mcp-remote`:
+
+```json
+{
+  "mcpServers": {
+    "spookit": { "command": "npx", "args": ["-y", "mcp-remote", "https://commerce.spookit.com/api/mcp"] }
+  }
+}
+```
+
 ## Scripts
 
 | Script | Purpose |
