@@ -32,7 +32,8 @@ A single Next.js app on Vercel hosts everything (one deploy, no CORS):
     orchestration, analytics (ported from the demo).
   - `services/catalog` — products / merchandising, live source for the A2A tools.
   - `services/crm` — agent CRM (segments, LTV, scoped rules).
-  - `services/a2a` — identification scheme + per-action gate.
+  - `services/a2a` — DID parsing/validation (`did.ts`), identification scheme +
+    TOFU key binding (`identity.ts`), per-action gate (`gate.ts`).
 - **Database** — one Neon Postgres project, two schemas (`commerce` + `catalog`)
   via Drizzle ORM.
 
@@ -42,7 +43,7 @@ A single Next.js app on Vercel hosts everything (one deploy, no CORS):
 /services/commerce        reputation · rules · offers · orders · gateway · analytics
 /services/catalog         merchandising service
 /services/crm             agent CRM service
-/services/a2a             identification + gating
+/services/a2a             DID parsing · identification (TOFU) · gating
 /db/commerce              Drizzle schema (commerce)
 /db/catalog               Drizzle schema (catalog)
 /db/seed.ts               demo seed (CRM, rules, products, agents)
@@ -64,9 +65,35 @@ A single Next.js app on Vercel hosts everything (one deploy, no CORS):
 
 Decision per the project plan: **DID + signed nonce, mock-verified for the MVP.**
 To keep MCP **stateless** (no session/nonce store), identity is verified
-**per-request**: identified tools carry `did` + `signature`, verified as
-`sig::<did>` for the MVP (interface ready for a real DID-document verifier).
-Agent rows are created on first successful handshake (self-identification).
+**per-request**: identified tools carry `did` + `signature` (+ optional `pubkey`),
+verified as `sig::<did>` for the MVP. Agent rows are created on first successful
+handshake (self-identification).
+
+Around the (unchanged) mock signature, two correctness layers make the design
+robust so a real verifier can drop in later without touching callers:
+
+- **Method negotiation** — only accepted DID methods pass: **`did:key`** (unique
+  by keypair; the public key is embedded in the DID) and **`did:web`** (unique by
+  domain). The DID is parsed, validated, and **normalized** (the `did:<method>:`
+  prefix and any `did:web` domain are lowercased). Unsupported/malformed DIDs are
+  rejected with precise reasons (`did_method_unsupported` / `did_malformed`).
+- **Trust-on-first-use (TOFU) key binding** — a DID is locked to the **first
+  public key seen** for it. `did:key` derives that key from the DID itself;
+  `did:web` must present `pubkey` on its first handshake. A later call presenting
+  the same DID with a **different** key is rejected as `identity_key_mismatch`,
+  blocking impersonation. (No DB migration — the `agents.pubkey` column already
+  exists.)
+
+Failure reasons surfaced to the agent: `missing_credentials`, `did_malformed`,
+`did_method_unsupported`, `signature_verification_failed`,
+`pubkey_required_for_method`, `identity_key_mismatch`, `agent_revoked`.
+
+The published agent card and `describe_service` advertise the live scheme
+(accepted methods, recommendation, `keyBinding`, and the `pubkey` credential
+field), so agents read it at runtime rather than hard-coding it. Implementation:
+`services/a2a/did.ts` (pure parsing/validation/key-derivation, the seam for real
+`did:key` decode) + `services/a2a/identity.ts` (verification flow). The mock
+signature itself stays in `services/commerce/reputation.ts`.
 
 ## Getting started
 
@@ -112,6 +139,11 @@ For the MVP, sign as `sig::<did>`. Example flow:
 4. `add_to_cart` → `checkout` → `confirm_purchase`.
 5. `request_refund` for a paid order.
 
+The seeded agents (`did:web:openclaw.ai`, `did:web:hermes.bot`) adopt their key on
+first handshake, so they work without sending `pubkey`. A **new** identity should
+use a `did:key` (key derived from the DID) — or a `did:web` that presents `pubkey`
+on its first call. See [Choosing and generating a DID](#choosing-and-generating-a-did-client-side).
+
 ## Buyer agent skill (Hermes)
 
 The [`Skill/`](Skill) folder is a portable **Agent Skill** that teaches a buyer
@@ -148,8 +180,9 @@ node Skill/scripts/buy.mjs --category compute --qty 1 --confirm
 
 Flags: `--category <name>`, `--query <text>`, `--max-price <usd>`, `--qty <n>`,
 `--customer <ref>`, `--confirm` (finalize payment), `--endpoint <url>`,
-`--did <did>`. Identity can also be set via `SPOOKIT_MCP_URL`, `SPOOKIT_DID`,
-and `SPOOKIT_SIGNATURE` env vars.
+`--did <did>`, `--pubkey <multibase>` (only for a new `did:web`). Identity can
+also be set via `SPOOKIT_MCP_URL`, `SPOOKIT_DID`, `SPOOKIT_SIGNATURE`, and
+`SPOOKIT_PUBKEY` env vars.
 
 Connection details (also in `SKILL.md`):
 
@@ -170,6 +203,43 @@ bridge with `mcp-remote`:
 }
 ```
 
+### Choosing and generating a DID (client-side)
+
+The gateway is a **pure verifier** — it never mints DIDs. Your agent generates a
+DID it controls off-platform and presents it on every call. The server accepts
+two methods and binds your DID to the **first public key it sees**
+(trust-on-first-use), so uniqueness and anti-impersonation come from key control,
+not from randomizing the DID string.
+
+- **`did:key`** — recommended for ephemeral/anonymous buyers. Unique by keypair,
+  no infrastructure. The public key is embedded in the DID, so `pubkey` is
+  optional.
+- **`did:web`** — use if you have a stable domain and want a human-readable
+  identity. You **must** present `pubkey` on the first handshake (the server
+  resolves the key from your DID document in production).
+
+Generate once, persist the private key, and reuse the DID forever — reputation
+accrues to it across sessions. Rotate only on compromise (a new DID = new
+reputation). Pseudocode:
+
+```js
+import { generateKeyPair } from "@noble/ed25519"; // or any Ed25519 lib
+
+// 1. One-time: create a keypair and derive a did:key. PERSIST the private key.
+const { publicKey, privateKey } = await generateKeyPair();
+const did = `did:key:${multibaseBase58btc(0xed01, publicKey)}`; // z6Mk...
+savePrivateKey(privateKey);
+
+// 2. Per request: sign the challenge. (MVP mock accepts `sig::<did>`.)
+const signature = `sig::${did}`; // production: real Ed25519 signature
+
+// 3. Present credentials on every identified tool call.
+await callTool("search_products", { did, signature /*, pubkey for did:web */ });
+```
+
+The server normalizes your DID (lowercases the `did:<method>:` prefix and the
+did:web domain), so sign over the normalized form.
+
 ## Scripts
 
 | Script | Purpose |
@@ -178,6 +248,7 @@ bridge with `mcp-remote`:
 | `npm run build` / `start` | Production build / serve |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint (next config) |
+| `npm test` | Vitest unit tests (DID parsing + identity) |
 | `npm run db:push` | Push Drizzle schema to Neon |
 | `npm run db:generate` / `db:migrate` | Generate + run SQL migrations |
 | `npm run db:seed` | Seed demo data |
@@ -196,6 +267,8 @@ observability, demo polish).
 - **Dashboard auth:** intentionally none (public demo). Gate with Clerk/credential
   before any commercial use.
 - **Payments:** mock payment intent; design targets Stripe later.
-- **DID verification:** mock `sig::<did>`; swap in a real verifier post-MVP.
+- **DID verification:** mock `sig::<did>` with method negotiation (did:key /
+  did:web) + trust-on-first-use key binding around it; swap in a real signature
+  verifier and `did:key` multibase decode (the `deriveKeyFromDid` seam) post-MVP.
 - **Refund policy:** refunds open in `pending` for owner review; window/partial
   rules to be finalized.

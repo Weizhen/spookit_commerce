@@ -34,10 +34,17 @@ const json = (data: unknown): ToolText => ({
 
 // Credential fields every identified tool carries (stateless per-request auth).
 const creds = {
-  did: z.string().describe("Your DID (decentralized identifier)."),
+  did: z.string().describe("Your DID (did:key or did:web)."),
   signature: z
     .string()
     .describe("Signature over the request. Mock: `sig::<did>` for the MVP."),
+  pubkey: z
+    .string()
+    .optional()
+    .describe(
+      "Your public key (multibase). Required on first handshake for did:web; " +
+        "for did:key it is derived from the DID and this field is optional.",
+    ),
 };
 
 const handler = createMcpHandler(
@@ -77,6 +84,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "negotiate_price",
           displayName: args.displayName,
         });
@@ -114,6 +122,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "check_inventory",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -148,6 +157,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "check_inventory",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -186,6 +196,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "place_order",
           executionUnits: 1,
         });
@@ -217,6 +228,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "check_inventory",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -232,6 +244,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "place_order",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -248,6 +261,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "place_order",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -265,6 +279,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "execute_contract",
           executionUnits: 1,
         });
@@ -295,6 +310,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "execute_contract",
           executionUnits: 1,
         });
@@ -319,6 +335,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "check_inventory",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -335,6 +352,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "check_inventory",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -351,6 +369,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "negotiate_price",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });
@@ -374,6 +393,7 @@ const handler = createMcpHandler(
         const gate = await gateAction({
           did: args.did,
           signature: args.signature,
+          pubkey: args.pubkey,
           intent: "list_prices",
         });
         if (!gate.ok) return json({ status: "denied", reason: gate.reason });

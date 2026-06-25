@@ -23,12 +23,18 @@ export interface GateResult {
 export async function gateAction(opts: {
   did?: string;
   signature?: string;
+  pubkey?: string;
   intent: AgentIntent;
   displayName?: string;
   computeUnits?: number;
   executionUnits?: number;
 }): Promise<GateResult> {
-  const identity = await verifyIdentity(opts.did, opts.signature, opts.displayName);
+  const identity = await verifyIdentity(
+    opts.did,
+    opts.signature,
+    opts.displayName,
+    opts.pubkey,
+  );
   if (!identity.ok) {
     return {
       ok: false,
