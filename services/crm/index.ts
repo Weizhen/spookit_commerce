@@ -222,6 +222,12 @@ export async function isRevoked(did: string): Promise<boolean> {
   return agent?.status === "revoked";
 }
 
+/** Neon HTTP returns SQL aggregates as strings; Drizzle timestamps need Date. */
+function coerceTimestamp(value: unknown): Date | null {
+  if (value == null) return null;
+  return value instanceof Date ? value : new Date(String(value));
+}
+
 /** Recompute an agent's CRM LTV + order count from its paid orders. */
 export async function refreshAgentLtv(did: string): Promise<void> {
   const [agg] = await db
@@ -233,20 +239,22 @@ export async function refreshAgentLtv(did: string): Promise<void> {
     .from(orders)
     .where(eq(orders.agentDid, did));
 
+  const lastOrderAt = coerceTimestamp(agg?.last);
+
   await db
     .insert(agentCrm)
     .values({
       agentDid: did,
       ltvUsd: Number(agg?.total ?? 0),
       totalOrders: Number(agg?.count ?? 0),
-      lastOrderAt: agg?.last ?? null,
+      lastOrderAt,
     })
     .onConflictDoUpdate({
       target: agentCrm.agentDid,
       set: {
         ltvUsd: Number(agg?.total ?? 0),
         totalOrders: Number(agg?.count ?? 0),
-        lastOrderAt: agg?.last ?? null,
+        lastOrderAt,
       },
     });
 }
