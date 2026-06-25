@@ -194,6 +194,25 @@ h4 {
   border-radius: 2px;
   display: inline-block;
 }
+.feed-sync {
+  margin-left: auto;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  font-weight: 500;
+  text-transform: none;
+}
+.feed-row-new {
+  animation: feed-highlight 2s ease-out;
+}
+@keyframes feed-highlight {
+  from {
+    background: rgba(0, 255, 200, 0.1);
+  }
+  to {
+    background: transparent;
+  }
+}
 
 /* KPI stat tile. */
 .stat {

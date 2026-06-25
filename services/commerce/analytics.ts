@@ -3,7 +3,7 @@
  * order data into decision-grade KPIs (decision mix, reputation distribution,
  * revenue / refund rollups, live activity feed).
  */
-import { desc, sql } from "drizzle-orm";
+import { desc, gt, sql } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { orders, refunds, transactions } from "@/db/commerce/schema";
@@ -33,7 +33,21 @@ const EMPTY_MIX: Record<Decision, number> = {
   REJECTED: 0,
 };
 
-export async function getOpsSnapshot(limit = 25): Promise<OpsSnapshot> {
+function mapTransactionRow(r: {
+  id: number;
+  ts: Date | string;
+  did: string;
+  intent: string;
+  rank: number;
+  decision: string;
+}): RecentTransaction {
+  return {
+    ...r,
+    ts: r.ts instanceof Date ? r.ts.toISOString() : String(r.ts),
+  };
+}
+
+async function getDecisionMixAndTotals() {
   const mixRows = await db
     .select({
       decision: transactions.decision,
@@ -55,7 +69,19 @@ export async function getOpsSnapshot(limit = 25): Promise<OpsSnapshot> {
     }
   }
 
-  const recentRows = await db
+  return {
+    totalRequests: total,
+    avgRank: total > 0 ? Math.round((rankWeighted / total) * 10) / 10 : 0,
+    decisionMix,
+    premiumConversionPct:
+      total > 0 ? Math.round((decisionMix.PREMIUM / total) * 1000) / 10 : 0,
+  };
+}
+
+export async function getRecentTransactions(
+  limit = 25,
+): Promise<RecentTransaction[]> {
+  const rows = await db
     .select({
       id: transactions.id,
       ts: transactions.ts,
@@ -68,17 +94,56 @@ export async function getOpsSnapshot(limit = 25): Promise<OpsSnapshot> {
     .orderBy(desc(transactions.id))
     .limit(limit);
 
-  return {
-    totalRequests: total,
-    avgRank: total > 0 ? Math.round((rankWeighted / total) * 10) / 10 : 0,
-    decisionMix,
-    premiumConversionPct:
-      total > 0 ? Math.round((decisionMix.PREMIUM / total) * 1000) / 10 : 0,
-    recent: recentRows.map((r) => ({
-      ...r,
-      ts: r.ts instanceof Date ? r.ts.toISOString() : String(r.ts),
-    })),
-  };
+  return rows.map(mapTransactionRow);
+}
+
+/** Incremental feed: transactions with id strictly greater than `afterId`. */
+export async function getTransactionsAfter(
+  afterId: number,
+  limit = 25,
+): Promise<RecentTransaction[]> {
+  if (afterId <= 0) return getRecentTransactions(limit);
+
+  const rows = await db
+    .select({
+      id: transactions.id,
+      ts: transactions.ts,
+      did: transactions.did,
+      intent: transactions.intent,
+      rank: transactions.rank,
+      decision: transactions.decision,
+    })
+    .from(transactions)
+    .where(gt(transactions.id, afterId))
+    .orderBy(desc(transactions.id))
+    .limit(limit);
+
+  return rows.map(mapTransactionRow);
+}
+
+export interface DashboardStats {
+  totalRequests: number;
+  avgRank: number;
+  decisionMix: Record<Decision, number>;
+  premiumConversionPct: number;
+  revenue: RevenueSnapshot;
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const [stats, revenue] = await Promise.all([
+    getDecisionMixAndTotals(),
+    getRevenueSnapshot(),
+  ]);
+  return { ...stats, revenue };
+}
+
+export async function getOpsSnapshot(limit = 25): Promise<OpsSnapshot> {
+  const [stats, recent] = await Promise.all([
+    getDecisionMixAndTotals(),
+    getRecentTransactions(limit),
+  ]);
+
+  return { ...stats, recent };
 }
 
 export interface RevenueSnapshot {
