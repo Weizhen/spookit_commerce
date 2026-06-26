@@ -9,6 +9,17 @@ const FEED_POLL_MS = 5_000;
 const FEED_MAX_ROWS = 50;
 const HIGHLIGHT_MS = 2_000;
 
+function formatFeedTs(ts: string | Date) {
+  return new Date(ts).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
 export function LiveActivityFeed({
   initial,
 }: {
@@ -99,7 +110,7 @@ export function LiveActivityFeed({
                   className={highlightIds.has(tx.id) ? "feed-row-new" : undefined}
                   style={{ borderTop: "1px solid var(--stroke)" }}
                 >
-                  <Td dim>{new Date(tx.ts).toLocaleTimeString()}</Td>
+                  <Td dim>{formatFeedTs(tx.ts)}</Td>
                   <Td mono>{tx.did}</Td>
                   <Td dim>{tx.intent}</Td>
                   <Td>{tx.rank}</Td>
