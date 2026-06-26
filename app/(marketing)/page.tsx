@@ -5,6 +5,17 @@ const BASE =
   process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") ??
   "https://commerce.spookit.com";
 
+const SKILL_REPO = "https://github.com/Weizhen/spookit_commerce";
+const SKILL_PATH = `${SKILL_REPO}/tree/main/Skill`;
+
+const AGENT_INSTALL_PROMPTS = {
+  cursor: `Install the Spookit Commerce buyer skill from ${SKILL_PATH} into my skills directory as spookit-commerce-buyer. Read SKILL.md, connect to ${BASE}/api/mcp, and use identity did:web:hermes.bot with signature sig::did:web:hermes.bot. Then search compute products, add the cheapest in-stock item to cart, checkout, and confirm the purchase.`,
+  openclaw: `Clone ${SKILL_REPO} and run: openclaw skills install ./spookit_commerce/Skill
+
+Add the Spookit MCP gateway to my OpenClaw config (mcp-remote → ${BASE}/api/mcp). Use identity did:web:openclaw.ai and signature sig::did:web:openclaw.ai on every identified tool call. Follow the installed skill to subscribe, search compute, and complete a purchase.`,
+  hermes: `Install the buyer skill from ${SKILL_PATH}. Connect to ${BASE}/api/mcp as did:web:hermes.bot (signature sig::did:web:hermes.bot). Follow SKILL.md end-to-end: describe_service → subscribe → search_products (compute) → add_to_cart → checkout → confirm_purchase.`,
+} as const;
+
 const FEATURES = [
   {
     title: "Reputation-aware pricing",
@@ -195,23 +206,38 @@ export default function MarketingPage() {
               Install the skill and make your first trade
             </h2>
             <p className="marketing-section-lead">
-              The repo ships a portable Agent Skill and a runnable buyer script.
-              Point Hermes (or any MCP client) at the live endpoint and walk
-              through discovery → subscribe → search → cart → checkout.
+              Paste one prompt into Cursor, OpenClaw, or Hermes — the agent
+              installs the skill, wires the MCP gateway, and runs a test
+              purchase. No manual config files required.
             </p>
           </div>
 
           <div className="marketing-test-grid">
-            <div className="marketing-card marketing-card-code">
-              <h3 className="marketing-card-title">1 · Install the buyer skill</h3>
+            <div className="marketing-card marketing-card-code marketing-card-wide">
+              <h3 className="marketing-card-title">
+                1 · Paste into your agent
+              </h3>
               <p className="marketing-card-body">
-                Copy the <code>Skill/</code> folder into your agent&apos;s skills
-                directory and install the MCP client SDK:
+                Copy the prompt for your runtime. The agent clones{" "}
+                <code>Skill/</code> from{" "}
+                <a
+                  href={SKILL_REPO}
+                  className="marketing-inline-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {SKILL_REPO.replace("https://", "")}
+                </a>
+                , installs it, connects MCP, and walks the buyer flow.
               </p>
-              <pre className="marketing-pre">{`npm install @modelcontextprotocol/sdk
-
-# Cursor / Claude — personal skills dir:
-# ~/.cursor/skills/spookit-commerce-buyer/`}</pre>
+              <p className="marketing-prompt-label">Cursor</p>
+              <pre className="marketing-pre">{AGENT_INSTALL_PROMPTS.cursor}</pre>
+              <p className="marketing-prompt-label">OpenClaw</p>
+              <pre className="marketing-pre">
+                {AGENT_INSTALL_PROMPTS.openclaw}
+              </pre>
+              <p className="marketing-prompt-label">Hermes</p>
+              <pre className="marketing-pre">{AGENT_INSTALL_PROMPTS.hermes}</pre>
             </div>
 
             <div className="marketing-card marketing-card-code">
@@ -225,7 +251,20 @@ export default function MarketingPage() {
             </div>
 
             <div className="marketing-card marketing-card-code">
-              <h3 className="marketing-card-title">3 · Or wire MCP directly</h3>
+              <h3 className="marketing-card-title">3 · Manual install (optional)</h3>
+              <p className="marketing-card-body">
+                Prefer doing it yourself? Copy <code>Skill/</code> into your
+                agent&apos;s skills directory and install the MCP SDK:
+              </p>
+              <pre className="marketing-pre">{`git clone ${SKILL_REPO}
+# Cursor: ~/.cursor/skills/spookit-commerce-buyer/
+# OpenClaw: openclaw skills install ./spookit_commerce/Skill
+
+npm install @modelcontextprotocol/sdk`}</pre>
+            </div>
+
+            <div className="marketing-card marketing-card-code">
+              <h3 className="marketing-card-title">4 · Wire MCP directly</h3>
               <p className="marketing-card-body">
                 Streamable HTTP endpoint and agent card for any MCP host:
               </p>
@@ -244,7 +283,7 @@ Discovery: ${BASE}/.well-known/agent-card.json
             </div>
 
             <div className="marketing-card marketing-card-code">
-              <h3 className="marketing-card-title">4 · Identity on every call</h3>
+              <h3 className="marketing-card-title">5 · Identity on every call</h3>
               <p className="marketing-card-body">
                 Identified tools require <code>did</code> +{" "}
                 <code>signature</code> as tool arguments (MVP mock:{" "}

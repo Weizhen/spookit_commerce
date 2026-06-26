@@ -700,6 +700,28 @@ h4 {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
 }
+.marketing-test-grid .marketing-card-wide {
+  grid-column: 1 / -1;
+}
+.marketing-prompt-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mkt-muted);
+  margin: 16px 0 8px;
+}
+.marketing-prompt-label:first-of-type {
+  margin-top: 16px;
+}
+.marketing-inline-link {
+  color: var(--mkt-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.marketing-inline-link:hover {
+  color: var(--mkt-muted-hi);
+}
 .marketing-card-code .marketing-pre {
   margin-top: 16px;
 }
