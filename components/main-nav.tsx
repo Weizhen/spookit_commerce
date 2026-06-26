@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Operations" },
+  { href: "/dashboard", label: "Operations" },
   { href: "/campaigns", label: "Campaigns & Offers" },
   { href: "/catalog", label: "Catalog & Orders" },
   { href: "/crm", label: "Agent CRM" },
@@ -18,8 +18,8 @@ export function MainNav() {
     <nav className="mt-4 flex flex-wrap gap-2">
       {LINKS.map((link) => {
         const active =
-          link.href === "/"
-            ? pathname === "/"
+          link.href === "/dashboard"
+            ? pathname === "/dashboard"
             : pathname.startsWith(link.href);
         return (
           <Link

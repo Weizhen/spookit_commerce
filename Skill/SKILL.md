@@ -14,6 +14,14 @@ Hermes is a procurement agent that buys from the **Spookit A2A Commerce
 Gateway** through its MCP interface. Discovery is open; everything else is
 **identified per call**.
 
+Platform URLs (live):
+
+| | |
+|---|---|
+| Marketing / docs | `https://commerce.spookit.com/` |
+| Operations console | `https://commerce.spookit.com/dashboard` |
+| A2A spec | `https://commerce.spookit.com/a2a` |
+
 ## Connection
 
 | | |

@@ -21,12 +21,14 @@ order → refund), and an Agent CRM.
 
 A single Next.js app on Vercel hosts everything (one deploy, no CORS):
 
-- **A2A MCP endpoint** — `app/api/mcp/route.ts` (discovery open; subscribe +
+- **Marketing site** — public landing at `/` (concept, workflow, skill install,
+  CTA to the console). Live at [commerce.spookit.com](https://commerce.spookit.com/).
+- **A2A MCP endpoint** — `app/api/[transport]/route.ts` (discovery open; subscribe +
   commerce identified).
 - **Discovery** — `GET /.well-known/agent-card.json` advertises the endpoint,
   capabilities, and the identification scheme.
-- **Dashboard** (public, no auth) — Operations, Campaigns & Offers, Catalog &
-  Orders, Agent CRM, Governance, and the A2A spec page.
+- **Dashboard** (public, no auth) — Operations at `/dashboard`, plus Campaigns &
+  Offers, Catalog & Orders, Agent CRM, Governance, and the A2A spec page.
 - **Service modules** (framework-agnostic TypeScript):
   - `services/commerce` — reputation, CRM-aware rules, offers, orders, gateway
     orchestration, analytics (ported from the demo).
@@ -123,7 +125,8 @@ npm run db:seed     # load demo CRM profiles, rules, products, agents
 
 ```bash
 npm run dev
-# Dashboard:   http://localhost:3000
+# Marketing:  http://localhost:3000
+# Dashboard:  http://localhost:3000/dashboard
 # Agent card:  http://localhost:3000/.well-known/agent-card.json
 # MCP:         http://localhost:3000/api/mcp
 ```
@@ -147,8 +150,9 @@ on its first call. See [Choosing and generating a DID](#choosing-and-generating-
 ## Buyer agent skill (Hermes)
 
 The [`Skill/`](Skill) folder is a portable **Agent Skill** that teaches a buyer
-agent (e.g. Hermes) how to transact against the live gateway. It contains the
-instructions (`SKILL.md`) and a runnable end-to-end buyer (`scripts/buy.mjs`).
+agent (e.g. Hermes) how to transact against the live gateway. Install and usage
+instructions are also on the [marketing site](https://commerce.spookit.com/#test).
+The skill contains `SKILL.md` and a runnable end-to-end buyer (`scripts/buy.mjs`).
 
 ```
 Skill/

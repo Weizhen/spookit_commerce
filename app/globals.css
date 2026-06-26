@@ -1,13 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
-
-/* ===========================================================================
-   Spookit industrial control-console theme.
-   Ported from the demo dashboard.py palette + typography:
-   charcoal base, engineered grid, Barlow Condensed headings, JetBrains Mono
-   body, cyan/amber/orange accents, hazard stripes.
-   =========================================================================== */
-
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 :root {
   --base: #0d0f12; /* iron / charcoal base */
@@ -21,6 +13,18 @@
   --orange: #ff7a18; /* industrial accent */
   --green: #2fbf71; /* nominal / go */
   --red: #e23b3b; /* critical / fault */
+
+  /* Marketing site — aligned with spookit.com (Weizhen/spookitweb) */
+  --mkt-bg: #000000;
+  --mkt-panel: #09090b;
+  --mkt-panel-alt: #18181b;
+  --mkt-border: rgba(255, 255, 255, 0.1);
+  --mkt-text: #ffffff;
+  --mkt-muted: #9ca3af;
+  --mkt-muted-hi: #d1d5db;
+  --mkt-accent: #ffffff;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -41,25 +45,22 @@
 
 html,
 body {
+  min-height: 100vh;
+}
+
+/* Console shell: industrial grid + mono typography */
+.console-shell {
   background-color: var(--base);
   color: var(--text);
   font-family: var(--font-mono);
-}
-
-/* Base: charcoal with a fine engineered grid + a faint cyan top glow. */
-body {
   background-image:
     linear-gradient(var(--stroke) 1px, transparent 1px),
     linear-gradient(90deg, var(--stroke) 1px, transparent 1px);
-  background-size:
-    38px 38px,
-    38px 38px;
-  background-position:
-    -1px -1px,
-    -1px -1px;
+  background-size: 38px 38px, 38px 38px;
+  background-position: -1px -1px, -1px -1px;
   min-height: 100vh;
 }
-body::before {
+.console-shell::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -277,4 +278,454 @@ h4 {
   color: var(--amber);
   border-color: var(--stroke);
   background: var(--panel);
+}
+
+/* ===========================================================================
+   Marketing site — matches spookit.com (Space Grotesk, Inter, zinc, green)
+   =========================================================================== */
+
+.marketing-shell {
+  background: var(--mkt-bg);
+  color: var(--mkt-text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.marketing-shell ::selection {
+  background: #fff;
+  color: #000;
+}
+
+.marketing-container {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Logo mark — BrainCircuit + wordmark (spookit.com nav) */
+.marketing-logo {
+  text-decoration: none;
+  color: inherit;
+}
+.marketing-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.marketing-logo-wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  color: var(--mkt-text);
+}
+.marketing-logo-sub {
+  margin-left: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--mkt-muted);
+}
+
+/* Header */
+.marketing-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--mkt-border);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+}
+.marketing-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+  gap: 16px;
+}
+.marketing-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.marketing-nav a {
+  font-size: 0.875rem;
+  color: var(--mkt-muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+.marketing-nav a:hover {
+  color: var(--mkt-text);
+}
+
+/* Buttons */
+.marketing-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.marketing-btn-lg {
+  padding: 16px 32px;
+  font-size: 1rem;
+}
+.marketing-btn-primary {
+  background: #ffffff;
+  color: #000000;
+}
+.marketing-btn-primary:hover {
+  background: #e5e5e5;
+}
+.marketing-btn-ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--mkt-text);
+}
+.marketing-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Hero */
+.marketing-hero {
+  padding: 96px 0 40px;
+  border-bottom: 1px solid var(--mkt-border);
+}
+.marketing-hero-inner {
+  max-width: 42rem;
+}
+.marketing-eyebrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  margin-bottom: 16px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--mkt-muted-hi);
+}
+.marketing-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulse 1.6s ease-out infinite;
+}
+.marketing-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin: 0 0 14px;
+  text-transform: none;
+}
+.marketing-gradient-text {
+  background: linear-gradient(to right, #e5e7eb, #6b7280);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.marketing-hero-lead {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--mkt-muted);
+  margin: 0 0 20px;
+}
+.marketing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.marketing-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.marketing-pill {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.marketing-pill-live {
+  color: var(--mkt-text);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.marketing-code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--mkt-muted);
+  background: var(--mkt-panel);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--mkt-border);
+}
+
+/* Sections */
+.marketing-section {
+  padding: 96px 0;
+}
+.marketing-section-alt {
+  background: var(--mkt-panel);
+  border-block: 1px solid var(--mkt-border);
+}
+.marketing-section-head {
+  max-width: 680px;
+  margin-bottom: 48px;
+}
+.marketing-section-head-center {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+.marketing-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mkt-muted);
+  margin-bottom: 12px;
+}
+.marketing-section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+  text-transform: none;
+}
+.marketing-section-lead {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--mkt-muted);
+  margin: 0;
+}
+
+/* Cards */
+.marketing-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+.marketing-card {
+  background: #000;
+  border: 1px solid var(--mkt-border);
+  border-radius: 24px;
+  padding: 32px;
+  transition: background 0.15s;
+}
+.marketing-section-alt .marketing-card {
+  background: #000;
+}
+.marketing-feature-card:hover {
+  background: rgba(24, 24, 27, 0.5);
+}
+.marketing-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--mkt-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--mkt-text);
+  transition: background 0.15s;
+}
+.marketing-feature-card:hover .marketing-feature-icon {
+  background: rgba(255, 255, 255, 0.1);
+}
+.marketing-card-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+  text-transform: none;
+  letter-spacing: -0.01em;
+}
+.marketing-card-body {
+  font-size: 0.925rem;
+  line-height: 1.65;
+  color: var(--mkt-muted);
+  margin: 0;
+}
+.marketing-card-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--mkt-muted-hi);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Workflow */
+.marketing-workflow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.marketing-workflow-step {
+  display: flex;
+  gap: 24px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--mkt-border);
+}
+.marketing-workflow-step:last-child {
+  border-bottom: none;
+}
+.marketing-workflow-num {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--mkt-muted);
+  min-width: 40px;
+}
+
+/* Test section */
+.marketing-test-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.marketing-card-code .marketing-pre {
+  margin-top: 16px;
+}
+.marketing-pre {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--mkt-muted);
+  background: var(--mkt-bg);
+  border: 1px solid var(--mkt-border);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.marketing-test-note {
+  margin-top: 32px;
+  font-size: 0.925rem;
+  color: var(--mkt-muted);
+  text-align: center;
+}
+.marketing-test-note a {
+  color: var(--mkt-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* CTA band */
+.marketing-cta {
+  padding: 96px 0;
+  position: relative;
+  overflow: hidden;
+}
+.marketing-cta::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  filter: blur(100px);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.marketing-cta-inner {
+  text-align: center;
+  max-width: 560px;
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+}
+.marketing-cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  margin: 0 0 12px;
+  text-transform: none;
+}
+.marketing-cta-lead {
+  color: var(--mkt-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+/* Footer */
+.marketing-footer {
+  border-top: 1px solid var(--mkt-border);
+  padding: 48px 0;
+  background: #000;
+}
+.marketing-footer-inner {
+  display: grid;
+  gap: 24px;
+}
+.marketing-footer-brand {
+  margin: 0 0 6px;
+}
+.marketing-footer-tagline {
+  font-size: 0.875rem;
+  color: var(--mkt-muted);
+  margin: 0;
+}
+.marketing-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.marketing-footer-links a {
+  font-size: 0.875rem;
+  color: var(--mkt-muted);
+  text-decoration: none;
+}
+.marketing-footer-links a:hover {
+  color: var(--mkt-text);
+}
+.marketing-footer-copy {
+  font-size: 0.75rem;
+  color: var(--mkt-muted);
+  margin: 0;
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .marketing-nav a:not(.marketing-btn) {
+    display: none;
+  }
+  .marketing-hero {
+    padding: 88px 0 32px;
+  }
 }
