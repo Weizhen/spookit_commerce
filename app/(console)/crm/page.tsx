@@ -28,7 +28,7 @@ export default async function CrmPage() {
         curated segment, LTV, and order count. Segments feed CRM-scoped
         commercial rules.
       </p>
-      <div className="panel" style={{ overflow: "hidden" }}>
+      <div className="panel panel-scroll">
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ color: "var(--dim)", fontSize: "0.66rem" }}>

@@ -15,7 +15,7 @@ const LINKS = [
 export function MainNav() {
   const pathname = usePathname();
   return (
-    <nav className="mt-4 flex flex-wrap gap-2">
+    <nav className="console-nav mt-4">
       {LINKS.map((link) => {
         const active =
           link.href === "/dashboard"

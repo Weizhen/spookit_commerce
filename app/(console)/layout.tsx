@@ -13,10 +13,12 @@ export default function ConsoleLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="console-shell relative z-10 mx-auto max-w-[1400px] px-4 py-5">
-      <ConsoleHeader />
-      <MainNav />
-      <main className="mt-5">{children}</main>
+    <div className="console-shell min-h-screen w-full">
+      <div className="console-inner relative z-10">
+        <ConsoleHeader />
+        <MainNav />
+        <main className="mt-5">{children}</main>
+      </div>
     </div>
   );
 }

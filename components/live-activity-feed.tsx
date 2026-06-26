@@ -75,7 +75,7 @@ export function LiveActivityFeed({
         <span className="tick" /> LIVE A2A ACTIVITY FEED
         <span className="feed-sync">Updated {syncLabel}</span>
       </div>
-      <div className="panel" style={{ overflow: "hidden" }}>
+      <div className="panel panel-scroll">
         {rows.length === 0 ? (
           <p style={{ padding: 20, color: "var(--dim)", fontSize: "0.85rem" }}>
             No agent traffic yet. Once buyer agents hit the A2A endpoint, scored

@@ -90,7 +90,7 @@ function ToolTable({
   access: "open" | "identified";
 }) {
   return (
-    <div className="panel" style={{ overflow: "hidden" }}>
+    <div className="panel panel-scroll">
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
           {rows.map(([name, purpose]) => (

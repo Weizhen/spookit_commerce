@@ -27,7 +27,7 @@ export default async function GovernancePage() {
         within a layer the lowest priority number wins. CRM-aware conditions
         (agent DID / CRM segment) let a rule target a specific agent or segment.
       </p>
-      <div className="panel" style={{ overflow: "hidden" }}>
+      <div className="panel panel-scroll">
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ color: "var(--dim)", fontSize: "0.66rem" }}>

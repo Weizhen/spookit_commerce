@@ -20,7 +20,7 @@ export default async function CatalogPage() {
         Active products are the live source of truth for the A2A commerce tools.
         (Editing via the admin API / portal forms lands in a later phase.)
       </p>
-      <div className="panel" style={{ overflow: "hidden" }}>
+      <div className="panel panel-scroll">
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ color: "var(--dim)", fontSize: "0.66rem" }}>
